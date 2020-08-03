@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'models/item.dart';
+import 'models/task.dart';
 
 void main() {
   runApp(MyApp());
@@ -97,28 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      // body: ListView.builder(
-      //   itemCount: widget.items.length,
-      //   itemBuilder: (BuildContext ctxt, int index) {
-      //     final item = widget.items[index];
-      //     return Dismissible(
-      //       key: Key(item.title),
-      //       background: Container(
-      //         color: Colors.red.withOpacity(0.2),
-      //       ),
-      //       onDismissed: (direction) {},
-      //       child: CheckboxListTile(
-      //         title: Text(item.title),
-      //         value: item.done,
-      //         onChanged: (value) {
-      //           setState(() {
-      //             item.done = value;
-      //           });
-      //         },
-      //       ),
-      //     );
-      //   },
-      // ),
       body: StreamBuilder(
         stream: Firestore.instance.collection('tasks').snapshots(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
