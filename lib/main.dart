@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'models/item.dart';
@@ -88,26 +89,71 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: widget.items.length,
-        itemBuilder: (BuildContext ctxt, int index) {
-          final item = widget.items[index];
-          return Dismissible(
-            key: Key(item.title),
-            background: Container(
-              color: Colors.red.withOpacity(0.2),
-            ),
-            onDismissed: (direction) {},
-            child: CheckboxListTile(
-              title: Text(item.title),
-              value: item.done,
-              onChanged: (value) {
-                setState(() {
-                  item.done = value;
-                });
-              },
-            ),
-          );
+      // body: ListView.builder(
+      //   itemCount: widget.items.length,
+      //   itemBuilder: (BuildContext ctxt, int index) {
+      //     final item = widget.items[index];
+      //     return Dismissible(
+      //       key: Key(item.title),
+      //       background: Container(
+      //         color: Colors.red.withOpacity(0.2),
+      //       ),
+      //       onDismissed: (direction) {},
+      //       child: CheckboxListTile(
+      //         title: Text(item.title),
+      //         value: item.done,
+      //         onChanged: (value) {
+      //           setState(() {
+      //             item.done = value;
+      //           });
+      //         },
+      //       ),
+      //     );
+      //   },
+      // ),
+      body: StreamBuilder(
+        stream: Firestore.instance.collection('items').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          }
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return LinearProgressIndicator();
+              break;
+            default:
+              return ListView.builder(
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (BuildContext ctxt, int index) {
+                  final item = snapshot.data.documents[index];
+                  final itemID = snapshot.data.documents[index].documentID;
+                  return Dismissible(
+                    key: Key(itemID),
+                    background: Container(
+                      color: Colors.red.withOpacity(0.2),
+                    ),
+                    onDismissed: (direction) {},
+                    child: CheckboxListTile(
+                      title: Text("${item.data['name']}"),
+                      value: false,
+                      onChanged: (value) {},
+                    ),
+                  );
+                },
+              );
+            // return Center(
+            //   child: ListView(
+            //     children: snapshot.data.documents
+            //         .map<Widget>((DocumentSnapshot doc) {
+            //       return ListTile(
+            //         leading: Icon(Icons.people, size: 52),
+            //         title: Text("${doc.data['name']}"),
+            //       );
+            //     }).toList(),
+            //   ),
+            // );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
