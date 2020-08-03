@@ -24,13 +24,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   var items = new List<Item>();
 
-  MyHomePage() {
-    items = [];
-    items.add(Item(title: "Item 1", done: false));
-    items.add(Item(title: "Item 2", done: true));
-    items.add(Item(title: "Item 3", done: true));
-  }
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -58,17 +51,32 @@ class _MyHomePageState extends State<MyHomePage> {
           });
       return;
     }
-    setState(() {
-      widget.items.add(
-        Item(title: newTaskCtrl.text, done: false),
-      );
+    setState(() async {
+      var item = Item(title: newTaskCtrl.text, done: false);
+      CollectionReference dbReplies = Firestore.instance.collection('tasks');
+      await Firestore.instance
+          .runTransaction((Transaction myTransaction) async {
+        await dbReplies.add(item.toJson());
+      });
       newTaskCtrl.clear();
     });
   }
 
-  void remove(int index) {
-    setState(() {
-      widget.items.removeAt(index);
+  void remove(AsyncSnapshot snapshot, int index) {
+    setState(() async {
+      await Firestore.instance
+          .runTransaction((Transaction myTransaction) async {
+        await myTransaction.delete(snapshot.data.documents[index].reference);
+      });
+    });
+  }
+
+  void update(String itemID, bool value) {
+    setState(() async {
+      await Firestore.instance
+          .collection('tasks')
+          .document(itemID)
+          .updateData(<String, dynamic>{'done': value});
     });
   }
 
@@ -84,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
             fontSize: 18,
           ),
           decoration: InputDecoration(
-            labelText: "New item",
+            labelText: "New Task",
             labelStyle: TextStyle(color: Colors.white),
           ),
         ),
@@ -112,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //   },
       // ),
       body: StreamBuilder(
-        stream: Firestore.instance.collection('items').snapshots(),
+        stream: Firestore.instance.collection('tasks').snapshots(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasError) {
             return Text("Error: ${snapshot.error}");
@@ -128,31 +136,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (BuildContext ctxt, int index) {
                   final item = snapshot.data.documents[index];
                   final itemID = snapshot.data.documents[index].documentID;
+
                   return Dismissible(
                     key: Key(itemID),
                     background: Container(
                       color: Colors.red.withOpacity(0.2),
                     ),
-                    onDismissed: (direction) {},
+                    onDismissed: (direction) {
+                      remove(snapshot, index);
+                    },
                     child: CheckboxListTile(
-                      title: Text("${item.data['name']}"),
-                      value: false,
-                      onChanged: (value) {},
+                      title: Text("${item.data['title']}"),
+                      value: item.data['done'],
+                      onChanged: (value) {
+                        update(itemID, value);
+                      },
                     ),
                   );
                 },
               );
-            // return Center(
-            //   child: ListView(
-            //     children: snapshot.data.documents
-            //         .map<Widget>((DocumentSnapshot doc) {
-            //       return ListTile(
-            //         leading: Icon(Icons.people, size: 52),
-            //         title: Text("${doc.data['name']}"),
-            //       );
-            //     }).toList(),
-            //   ),
-            // );
           }
         },
       ),
