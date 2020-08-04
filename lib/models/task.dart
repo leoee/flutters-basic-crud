@@ -1,10 +1,10 @@
-class Item {
+class Task {
   String title;
   bool done;
 
-  Item({this.title, this.done});
+  Task({this.title, this.done});
 
-  Item.fromJson(Map<String, dynamic> json) {
+  Task.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     done = json['done'];
   }
