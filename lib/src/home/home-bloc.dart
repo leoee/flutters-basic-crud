@@ -6,6 +6,9 @@ import 'package:flutter_basics/src/home/home-service.dart';
 
 class HomeBloc extends BlocBase {
   HomeService homeService;
+  final String newMessage = "New";
+  final String inProgressMessage = "In Progress";
+  final String doneMessage = "Done";
 
   HomeBloc() {
     homeService = HomeService();
@@ -19,12 +22,13 @@ class HomeBloc extends BlocBase {
   String getNextState(var item, DismissDirection direction) {
     var value = item.data['status'];
     var forward = direction == DismissDirection.startToEnd ? true : false;
-    if ((value == "new" && forward) || (value == "done" && !forward)) {
-      return "progress";
-    } else if (value == "progress" && forward) {
-      return "done";
-    } else if (value == "progress") {
-      return "new";
+    if ((value == newMessage && forward) ||
+        (value == doneMessage && !forward)) {
+      return inProgressMessage;
+    } else if (value == inProgressMessage && forward) {
+      return doneMessage;
+    } else if (value == inProgressMessage) {
+      return newMessage;
     } else {
       return "";
     }
@@ -32,9 +36,9 @@ class HomeBloc extends BlocBase {
 
   DismissDirection getValidDismissable(var item) {
     var value = item.data['status'];
-    if (value == "new") {
+    if (value == newMessage) {
       return DismissDirection.startToEnd;
-    } else if (value == "done") {
+    } else if (value == doneMessage) {
       return DismissDirection.endToStart;
     } else {
       return DismissDirection.horizontal;
@@ -44,11 +48,11 @@ class HomeBloc extends BlocBase {
   Stream<QuerySnapshot> filterListByStatus(int tabIndex, String owner) {
     var filter = "";
     if (tabIndex == 0) {
-      filter = "new";
+      filter = newMessage;
     } else if (tabIndex == 1) {
-      filter = "progress";
+      filter = inProgressMessage;
     } else {
-      filter = "done";
+      filter = doneMessage;
     }
     return Firestore.instance
         .collection('tasks')
