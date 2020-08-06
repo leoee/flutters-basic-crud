@@ -14,8 +14,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String owner;
   HomeBloc homeBloc;
-  AppBarWidget appBarWidget;
-  BodyWidget bodyWidget;
   var _textNameTask;
   GlobalKey _bottomNavigationKey;
   var _currentSnapshots;
@@ -23,8 +21,6 @@ class _HomeState extends State<Home> {
 
   _HomeState() {
     homeBloc = HomeBloc();
-    appBarWidget = AppBarWidget();
-    bodyWidget = BodyWidget();
     owner = "leoe";
     _bottomNavigationKey = GlobalKey();
     _textNameTask = TextEditingController();
@@ -66,9 +62,11 @@ class _HomeState extends State<Home> {
           return AlertDialog(
             title: Text(title),
             content: Text(message),
+            backgroundColor: Colors.orangeAccent,
             actions: <Widget>[
               FloatingActionButton(
                 child: Text("Ok"),
+                backgroundColor: Colors.white,
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -113,9 +111,8 @@ class _HomeState extends State<Home> {
             });
           },
         ),
-        appBar:
-            appBarWidget.getAppBar(homeBloc, _currentTabView, _textNameTask),
-        body: bodyWidget.getBody(homeBloc, _currentSnapshots),
+        appBar: getAppBar(homeBloc, _currentTabView, _textNameTask),
+        body: getBody(homeBloc, _currentSnapshots),
         backgroundColor: Colors.orangeAccent,
         floatingActionButton: _bottomButtons(_currentTabView),
       ),
