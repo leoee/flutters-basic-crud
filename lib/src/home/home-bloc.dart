@@ -1,4 +1,5 @@
 import 'package:bloc_pattern/bloc_pattern.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_basics/src/home/home-service.dart';
@@ -38,5 +39,21 @@ class HomeBloc extends BlocBase {
     } else {
       return DismissDirection.horizontal;
     }
+  }
+
+  Stream<QuerySnapshot> filterListByStatus(int tabIndex, String owner) {
+    var filter = "";
+    if (tabIndex == 0) {
+      filter = "new";
+    } else if (tabIndex == 1) {
+      filter = "progress";
+    } else {
+      filter = "done";
+    }
+    return Firestore.instance
+        .collection('tasks')
+        .where("owner", isEqualTo: owner)
+        .where("status", isEqualTo: filter)
+        .snapshots();
   }
 }

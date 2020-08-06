@@ -11,43 +11,48 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  HomeBloc homeBloc = new HomeBloc();
-  var _newTaskCtrl = TextEditingController();
-  GlobalKey _bottomNavigationKey = GlobalKey();
-  var _currentSnapshots = Firestore.instance
-      .collection('tasks')
-      .where("owner", isEqualTo: "leoe")
-      .where("status", isEqualTo: "new")
-      .snapshots();
+  String owner;
+  HomeBloc homeBloc;
+  var _textNameTask;
+  GlobalKey _bottomNavigationKey;
+  var _currentSnapshots;
   int _currentTabView = 0;
 
-  void floatButtonAdd(TextEditingController _newTaskCtrl) {
-    if (_newTaskCtrl.text.isEmpty) {
+  _HomeState() {
+    homeBloc = HomeBloc();
+    owner = "leoe";
+    _bottomNavigationKey = GlobalKey();
+    _textNameTask = TextEditingController();
+    _currentSnapshots = homeBloc.filterListByStatus(_currentTabView, owner);
+  }
+
+  void floatButtonAdd(TextEditingController _textNameTask) {
+    if (_textNameTask.text.isEmpty) {
       dialog("Alert", "Name is empty");
       return;
     }
 
     var task = Task(
-        title: _newTaskCtrl.text,
+        title: _textNameTask.text,
         status: "new",
-        owner: "leoe",
+        owner: owner,
         description: "This is a description");
 
     homeBloc.homeService.add(task);
-    _newTaskCtrl.clear();
+    _textNameTask.clear();
   }
 
   Widget _bottomButtons(int currentTabView) {
     return currentTabView == 0
         ? FloatingActionButton(
-            onPressed: () => floatButtonAdd(_newTaskCtrl),
+            onPressed: () => floatButtonAdd(_textNameTask),
             child: Icon(Icons.add),
             backgroundColor: Colors.white,
           )
         : null;
   }
 
-  dialog(String title, String message) {
+  dynamic dialog(String title, String message) {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -96,26 +101,14 @@ class _HomeState extends State<Home> {
           ],
           onTap: (tab) {
             _currentTabView = tab;
-            var filter = "";
-            if (tab == 0) {
-              filter = "new";
-            } else if (tab == 1) {
-              filter = "progress";
-            } else {
-              filter = "done";
-            }
             setState(() {
-              _currentSnapshots = Firestore.instance
-                  .collection('tasks')
-                  .where("owner", isEqualTo: "leoe")
-                  .where("status", isEqualTo: filter)
-                  .snapshots();
+              _currentSnapshots = homeBloc.filterListByStatus(tab, owner);
             });
           },
         ),
         appBar: AppBar(
           title: TextFormField(
-            controller: _newTaskCtrl,
+            controller: _textNameTask,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
               color: Colors.black,
