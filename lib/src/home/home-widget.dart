@@ -24,7 +24,8 @@ class _HomeState extends State<Home> {
     owner = "leoe";
     _bottomNavigationKey = GlobalKey();
     _textNameTask = TextEditingController();
-    _currentSnapshots = homeBloc.filterListByStatus(_currentTabView, owner);
+    _currentSnapshots =
+        homeBloc.filterDataByStatus(_currentTabView, owner).snapshots();
   }
 
   void buttonAddTask(TextEditingController _textNameTask) {
@@ -41,7 +42,7 @@ class _HomeState extends State<Home> {
         owner: owner,
         description: "This is a description");
 
-    homeBloc.homeService.add(task);
+    homeBloc.homeService.addTask(task);
     _textNameTask.clear();
   }
 
@@ -107,7 +108,8 @@ class _HomeState extends State<Home> {
           onTap: (tab) {
             _currentTabView = tab;
             setState(() {
-              _currentSnapshots = homeBloc.filterListByStatus(tab, owner);
+              _currentSnapshots =
+                  homeBloc.filterDataByStatus(tab, owner).snapshots();
             });
           },
         ),

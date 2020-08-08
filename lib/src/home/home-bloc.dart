@@ -45,8 +45,8 @@ class HomeBloc extends BlocBase {
     }
   }
 
-  Stream<QuerySnapshot> filterListByStatus(int tabIndex, String owner) {
-    var filter = "";
+  Query filterDataByStatus(int tabIndex, String ownerName) {
+    String filter = "";
     if (tabIndex == 0) {
       filter = newMessage;
     } else if (tabIndex == 1) {
@@ -54,10 +54,23 @@ class HomeBloc extends BlocBase {
     } else {
       filter = doneMessage;
     }
-    return Firestore.instance
-        .collection('tasks')
-        .where("owner", isEqualTo: owner)
-        .where("status", isEqualTo: filter)
-        .snapshots();
+    // return Firestore.instance
+    //     .collection('tasks')
+    //     .where("owner", isEqualTo: owner)
+    //     .where("status", isEqualTo: filter)
+    //     .snapshots();
+    CollectionReference collectionReference =
+        homeService.getCollectionReference("tasks");
+    Query dataFilteredByOwner =
+        filterDataByAttribute(collectionReference, "owner", ownerName);
+
+    return homeService.filterCollectionByAttribute(
+        dataFilteredByOwner, "status", filter);
+  }
+
+  Query filterDataByAttribute(CollectionReference collectionReference,
+      String attributeName, String attributeValue) {
+    return homeService.filterCollectionByAttribute(
+        collectionReference, attributeName, attributeValue);
   }
 }
