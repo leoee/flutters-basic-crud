@@ -25,24 +25,25 @@ class _HomeState extends State<Home> {
     _bottomNavigationKey = GlobalKey();
     _textNameTask = TextEditingController();
     _currentSnapshots =
-        homeBloc.filterDataByStatus(_currentTabView, owner).snapshots();
+        homeBloc.retrieveDataByStatus(_currentTabView, owner).snapshots();
   }
 
-  void buttonAddTask(TextEditingController _textNameTask) {
-    String text = _textNameTask.text;
-    if (text.isEmpty) {
-      return dialog("Alert", "Task name is empty");
-    } else if (text.length > 30) {
-      return dialog("Alert", "Task name must have less than 30 characters.");
+  Future<void> buttonAddTask(TextEditingController _textNameTask) async {
+    String taskName = _textNameTask.text;
+    String responseValidateTaskName =
+        await homeBloc.validateTaskName(taskName, owner);
+
+    if (responseValidateTaskName.isNotEmpty) {
+      return dialog("Alert", responseValidateTaskName);
     }
 
     var task = Task(
-        title: text,
-        status: homeBloc.newMessage,
+        title: taskName,
+        status: HomeBloc.NEW,
         owner: owner,
         description: "This is a description");
 
-    homeBloc.homeService.addTask(task);
+    homeBloc.addTask("leoe", task);
     _textNameTask.clear();
   }
 
@@ -87,19 +88,19 @@ class _HomeState extends State<Home> {
           key: _bottomNavigationKey,
           items: <Widget>[
             Text(
-              homeBloc.newMessage,
+              HomeBloc.NEW,
               style: TextStyle(
                 fontSize: 12,
               ),
             ),
             Text(
-              homeBloc.inProgressMessage,
+              HomeBloc.IN_PROGRESS,
               style: TextStyle(
                 fontSize: 12,
               ),
             ),
             Text(
-              homeBloc.doneMessage,
+              HomeBloc.DONE,
               style: TextStyle(
                 fontSize: 12,
               ),
@@ -109,7 +110,7 @@ class _HomeState extends State<Home> {
             _currentTabView = tab;
             setState(() {
               _currentSnapshots =
-                  homeBloc.filterDataByStatus(tab, owner).snapshots();
+                  homeBloc.retrieveDataByStatus(tab, owner).snapshots();
             });
           },
         ),

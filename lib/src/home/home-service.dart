@@ -3,8 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_basics/shared/models/task.dart';
 
 class HomeService {
-  Future<void> addTask(Task task) async {
-    CollectionReference dbReplies = Firestore.instance.collection('tasks');
+  Future<void> addTask(String collectionName, Task task) async {
+    CollectionReference dbReplies =
+        Firestore.instance.collection(collectionName);
     await Firestore.instance.runTransaction((Transaction myTransaction) async {
       await dbReplies.add(task.toJson());
     });
@@ -16,9 +17,10 @@ class HomeService {
     });
   }
 
-  Future<void> updateTask(String itemID, String field, String value) async {
+  Future<void> updateTask(
+      String collectionName, String itemID, String field, String value) async {
     await Firestore.instance
-        .collection('tasks')
+        .collection(collectionName)
         .document(itemID)
         .updateData(<String, dynamic>{field: value});
   }
@@ -27,8 +29,18 @@ class HomeService {
     return Firestore.instance.collection(collectionName);
   }
 
-  Query filterCollectionByAttribute(
+  Query retrieveCollectionByAttribute(
       Query collectionReference, String attributeName, String attributeValue) {
     return collectionReference.where(attributeName, isEqualTo: attributeValue);
+  }
+
+  Future<int> getTasksLengthByAttribute(String collectionName,
+      String attributeName, String attributeValue) async {
+    QuerySnapshot documentsFiltered = await Firestore.instance
+        .collection(collectionName)
+        .where(attributeName, isEqualTo: attributeValue)
+        .getDocuments();
+
+    return documentsFiltered.documents.length;
   }
 }

@@ -40,8 +40,7 @@ StreamBuilder<dynamic> getBody(HomeBloc homeBloc, var _currentSnapshots) {
                 onDismissed: (direction) {
                   String nextState = homeBloc.getNextState(item, direction);
                   if (nextState.isNotEmpty) {
-                    homeBloc.homeService
-                        .updateTask(itemID, "status", nextState);
+                    homeBloc.updateTask("leoe", itemID, "status", nextState);
                   }
                 },
                 child: Container(

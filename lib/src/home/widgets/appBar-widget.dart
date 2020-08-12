@@ -29,12 +29,12 @@ AppBar getAppBar(HomeBloc homeBloc, int _currentTabView,
     );
   } else if (_currentTabView == 1) {
     return AppBar(
-      title: Text(homeBloc.inProgressMessage),
+      title: Text(HomeBloc.IN_PROGRESS),
       backgroundColor: Colors.white,
     );
   } else {
     return AppBar(
-      title: Text(homeBloc.doneMessage),
+      title: Text(HomeBloc.DONE),
       backgroundColor: Colors.white,
     );
   }
